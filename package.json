@@ -1,0 +1,16 @@
+{
+  "name": "server_tampermonkey",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server_tampermonkey.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Max Vith",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "https": "^1.0.0"
+  }
+}
