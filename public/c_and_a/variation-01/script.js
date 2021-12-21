@@ -3,28 +3,6 @@
 // @codekit-prepend "../global/global.js";
 
 /**
- * WATO.elem             ==> Polling auf ein Element
- * WATO.initObserver     ==> Initialisierung des MutationObservers
- * WATO.observer         ==> DOM Element dem Observer hinzufügen
- * WATO.qs                 ==> Kurzform für document.querySelector
- * WATO.qsa             ==> Kurzform für document.querySelectorAll
- * WATO.ready             ==> Wartet auf document.ready
- * WATO.classlist         ==> Fügt mehrere Klassen einem Element hinzu oder entfernt sie
- * WATO.ajax             ==> Überprüfung auf Ajax-Aktivitäten auf der Seite ?
- * WATO.getCookie         ==> Ließt einen Cookie aus
- * WATO.setCookie         ==> Fügt einen Cookie hinzu
- * WATO.removeCookie     ==> Entfernt einen Cookie
- * WATO.exclude         ==> Punchout-Funktion
- * WATO.storageAvailable ==> Überprüft ob der LocalStorage verfügbar ist
- * WATO.reload           ==> Führt einen Reload aus (löscht dabei den #hash, als Workaround für manche Browser)
- * WATO.offsetY          ==> Gibt die Y-Position eines Elements zurück
- * WATO.scrollTo         ==> Scrollt bis zum Übergebenen Pixel (von oben)
- * WATO.event            ==> EventListener setzen
- * WATO.xhr_get          ==> Ajax GET Request
- * WATO.xhr_post          ==> Ajax POST Request
- */
-
-/**
  * @function
  * @author Ahmed Makni
  * @namespace V1
@@ -33,16 +11,99 @@
  */
 (function (WATO) {
   "use strict";
-  // -------------------------FUNCTIONS-------------------
+  // -----------------------Vars--------------------------------------
+  const slider = (hrefs, imgs, prices) => {
+    return `<div class="col-xs-12 col-lg-8">
+        <div>
+            <div>
+                <div>
+                    <span class="util-h3 util-block reco-heading recommendation-all-link">
+                        <span>Noch etwas aus deiner Wunschliste?</span>
+                    </span>
+                    <div class="row util-reset-margin-bottom">
+                        <div class="col-xs-12">
+                            <div class="swiper-slider util-reset-margin-top">
+                                <div class="swiper-container">
+                                    <div class="swiper-wrapper">
+                                    ${imgs
+                                      .map((url, i) => {
+                                        return `
+                                        <div class="swiper-slide">
+                                            <div class="product-tile product-tile--minimal">
+                                                <a href="${hrefs[i]}">
+                                                    <div class="product-tile__img-wrapper">
+                                                        <div class="product-tile__img-overlay"></div>
+                                                        <picture>
+                                                            <img class="lazyload lazyload--fade product-tile__base-image lazyloaded" src="${url}" srcset="${url}"/>
+                                                        </picture>
+                                                        <span class="product-tile__quickwish is-active"></span>
+                                                    </div>
+                                                    <div class="product-tile__price">
+                                                        <span> ${prices[i]} </span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        </div>`;
+                                      })
+                                      .join(" ")}
+                                    </div>
+                                    <div class="swiper-scrollbar"></div>
+                                    <div class="swiper-button-prev"></div>
+                                    <div class="swiper-button-next"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a class='util-block recommendation-all-link' href="https://www.c-and-a.com/de/de/shop/wishlist">Zu allen Artikeln auf der Wunschliste</a>
+    </div>    
+    `;
+  };
+  // -----------------------Code------------------------------------
+  if (location.pathname === "/de/de/shop/basket") {
+    fetch("https://www.c-and-a.com/de/de/shop/wishlist")
+      .then(function (response) {
+        return response.text();
+      })
+      .then(function (html) {
+        var parser = new DOMParser();
+        var doc = parser.parseFromString(html, "text/html");
 
-  if (window.location.search.substring(1, 11) === "categoryId") {
-    WATO.elem(".product-stage", (parentNode) => {
-      document.querySelector("main section .container").insertAdjacentHTML(
-        "beforeend",
-        `<div class='d-flex product-stage mz-is-initialized'>
-          ${parentNode[0].innerHTML}
-         </div>`
-      );
-    });
+        // ----------------------------vars-----------------------------//
+        if (doc.body) {
+          const wishListItems = WATO.qsa(".wishlist__list .col-xs-12", doc);
+          const availableProducts = [];
+          const imgs = [];
+          const hrefs = [];
+          const prices = [];
+          wishListItems.forEach((product) => {
+            const checkProduct = WATO.qs(".product-tile__add-to-cart span", product);
+            if (checkProduct.textContent === "In den Warenkorb") {
+              availableProducts.push(product);
+            }
+          });
+          if (availableProducts.length) {
+            WATO.elem(".recommendation", (section) => {
+              section[0].style.display = "none";
+            });
+            WATO.elem(".basket__minibasket-wrapper", (parent) => {
+              if (parent) {
+                availableProducts.forEach((product) => {
+                  imgs.push(WATO.qs(".product-tile__img-wrapper picture img", product).dataset["src"]);
+                  hrefs.push(WATO.qs(".product-tile a", product).href);
+                  prices.push(WATO.qs(".product-tile__price span", product).textContent);
+                });
+                parent[0].insertAdjacentHTML("afterend", slider(hrefs, imgs, prices));
+              }
+            });
+          }
+        }
+        // ----------------------------vars-----------------------------//
+      })
+      .catch(function (err) {
+        console.log("Failed to fetch page: ", err);
+      });
   }
 })(new window.WATO());
