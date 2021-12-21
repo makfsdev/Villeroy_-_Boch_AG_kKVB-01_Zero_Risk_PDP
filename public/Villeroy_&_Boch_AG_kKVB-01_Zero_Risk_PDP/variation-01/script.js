@@ -59,7 +59,7 @@
             "",
             "Colis",
             "Bei uns kaufen Sie ohne Risiko",
-            "Bei uns können Sie entspannt zuhause entscheiden. Und falls mal etwas nicht gefällt: Nutzen Sie einfach unseren",
+            "Bei uns können Sie entspannt zuhause entscheiden. Und falls mal etwas nicht gefällt:</br> Nutzen Sie einfach unseren",
             "kostenlosen Rücksendeservice"
           )
         )
